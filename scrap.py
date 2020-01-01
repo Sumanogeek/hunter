@@ -36,7 +36,7 @@ def click_links(link_list):
         time.sleep(1)
         browser.execute_script("window.history.go(-1)")
         time.sleep(1)
-        if count > 2 :   # <-- To be removed for production run
+        if count > 1 :   # <-- To be removed for production run
             break
 
     return
@@ -76,7 +76,7 @@ def main():
     while not finished:
 
         breaker += 1
-        if breaker > 2:   # <-- To be removed for production run
+        if breaker > 7:   # <-- To be removed for production run
             break
 
         link_list = get_job_links()
