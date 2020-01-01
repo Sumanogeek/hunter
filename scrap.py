@@ -12,6 +12,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import selenium.webdriver.support.ui as ui
 from selenium.common.exceptions import TimeoutException
+from pyvirtualdisplay import Display
 
 def get_job_links():
     print ("get_job_links")
@@ -45,7 +46,9 @@ def main():
 
     global browser
 
-    path = r'/Users/sumanbalu/chromeDrive/chromedriver'
+    path = r'/usr/bin/chromedriver'
+    display = Display(visible=0, size=(800, 800))  
+    display.start()
     browser = webdriver.Chrome(executable_path = path)
 
     browser.get('https://www.naukri.com/')
