@@ -220,7 +220,7 @@ if __name__ == "__main__":
 
     connect_DB()
 
-    sys.stdout = open(sysout_File, 'w')
+    # sys.stdout = open(sysout_File, 'w')
 
     print (" *** Start *** ", )
     master, error = main()
