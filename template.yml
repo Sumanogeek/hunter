@@ -1,0 +1,32 @@
+[
+  {
+    "title" : ["div", "class", "jd-header-title"],
+    "company" : ["div", "class", "jd-header-comp-name"],
+    "experience" : ["div", "class", "exp"],
+    "salary" : ["div", "class", "salary"],
+    "location" : ["span", "class", "location"],
+    "stats" : ["div", "class", "jd-stats"],
+    "job_description" : ["div", "class", "dang-inner-html"],
+    "key_skill" : ["div", "class", "key-skill"]
+  },
+  {
+    "title" : ["div", "class", "av-special-heading"],
+    "company" : ["div", "class", "f14"],
+    "experience" : ["span", "class", "slide-meta-exp"],
+    "salary" : ["span", "class", "slide-meta-sal"],
+    "location" : ["span", "class", "slide-meta-loc"],
+    "stats" : ["div", "class", "sumFoot"],
+    "job_description" : ["div", "class", "clearboth"],
+    "key_skill" : ["div", "class", "tagcloud"]
+  },
+  {
+    "title" : ["div", "class", "cTitle"],
+    "company" : ["div", "class", "f14"],
+    "experience" : ["span", "class", "exp"],
+    "salary" : ["span", "class", "rup"],
+    "location" : ["span", "class", "loc"],
+    "stats" : ["div", "class", "sumFoot"],
+    "job_description" : ["div", "class", "alignJ"],
+    "key_skill" : ["div", "class", "skills-section"]
+  }
+]

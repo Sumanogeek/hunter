@@ -1,3 +1,8 @@
 Archive
 node_modules
 package-lock.json
+*.pem
+.DS_Store
+output
+config.yml
+updateMongo.py
