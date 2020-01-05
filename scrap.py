@@ -18,8 +18,8 @@ import selenium.webdriver.support.ui as ui
 from selenium.common.exceptions import TimeoutException
 from pyvirtualdisplay import Display
 
-# dev_run = False; prod_run = True
-dev_run = True ; prod_run = False   # <--- uncomment for Dev Run
+dev_run = False; prod_run = True
+# dev_run = True ; prod_run = False   # <--- uncomment for Dev Run
 
 time_stamp = datetime.now()
 sysout_File = "output/logs" + str(time_stamp) + ".txt"
