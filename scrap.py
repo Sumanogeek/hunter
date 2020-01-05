@@ -18,8 +18,8 @@ import selenium.webdriver.support.ui as ui
 from selenium.common.exceptions import TimeoutException
 from pyvirtualdisplay import Display
 
-dev_run = False; prod_run = True
-# dev_run = True ; prod_run = False   # <--- uncomment for Dev Run
+# dev_run = False; prod_run = True
+dev_run = True ; prod_run = False   # <--- uncomment for Dev Run
 
 time_stamp = datetime.now()
 sysout_File = "output/logs" + str(time_stamp) + ".txt"
@@ -45,7 +45,7 @@ def connect_DB():
         with open('config.yml', 'w') as f:
             yaml.dump(config, f, default_flow_style=False)
             
-    MONGODB_URL = "mongodb+srv://hunterDB:Mongo2hunt@clusterar3-dgymc.mongodb.net/test?retryWrites=true&w=majority"
+    MONGODB_URL = "mongodb+srv://{0}:{1}@clusterar3-dgymc.mongodb.net/test?retryWrites=true&w=majority".format(DBuser, DBpass)
     client = MongoClient(MONGODB_URL)
     huntDB = client["hunter"]
     huntCol = huntDB["jobs"]
