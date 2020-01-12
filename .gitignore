@@ -6,3 +6,4 @@ package-lock.json
 output
 config.yml
 updateMongo.py
+.python-version

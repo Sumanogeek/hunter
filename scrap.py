@@ -18,13 +18,31 @@ import selenium.webdriver.support.ui as ui
 from selenium.common.exceptions import TimeoutException
 from pyvirtualdisplay import Display
 
-dev_run = False; prod_run = True
-# dev_run = True ; prod_run = False   # <--- uncomment for Dev Run
+restart_pg = 0  # <--- set the restart page
+stop_pg = 25    # <--- set the stop page
+
+# dev_run = False; prod_run = True  # <--- uncomment for Prod Run
+dev_run = True ; prod_run = False   # <--- uncomment for Dev Run
 
 time_stamp = datetime.now()
 sysout_File = "output/logs" + str(time_stamp) + ".txt"
 error_File = "output/error" + str(time_stamp) + ".txt"
 result_File = "output/result" + str(time_stamp) + ".txt"
+
+class Logger(object):
+    def __init__(self):
+        self.terminal = sys.stdout
+        self.log = open(sysout_File, "a")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)  
+
+    def flush(self):
+        #this flush method is needed for python 3 compatibility.
+        #this handles the flush command by doing nothing.
+        #you might want to specify some extra behavior here.
+        pass    
 
 def connect_DB():
     print ("connect_DB")
@@ -45,9 +63,10 @@ def connect_DB():
         with open('config.yml', 'w') as f:
             yaml.dump(config, f, default_flow_style=False)
             
-    MONGODB_URL = "mongodb+srv://{0}:{1}@clusterar3-dgymc.mongodb.net/test?retryWrites=true&w=majority".format(DBuser, DBpass)
+    #MONGODB_URL = "mongodb+srv://{0}:{1}@clusterar3-dgymc.mongodb.net/test?retryWrites=true&w=majority".format(DBuser, DBpass)
+    MONGODB_URL = "mongodb+srv://{0}:{1}@clusterhunt-9868q.mongodb.net/test?retryWrites=true&w=majority".format(DBuser, DBpass)
     client = MongoClient(MONGODB_URL)
-    huntDB = client["hunter"]
+    huntDB = client["hunt"]
     huntCol = huntDB["jobs"]
 
     return
@@ -60,7 +79,7 @@ def get_job_links():
     link_list = []
 
     for item in links:
-        print ("item: ", item)
+        #print ("item: ", item)
         job_id = item.find_parent('div')['id']
         link_list.append([job_id,item['href']])
 
@@ -145,8 +164,8 @@ def click_links(link_list):
         browser.execute_script("window.history.go(-1)")
         time.sleep(1)
 
-        if count > 2 and dev_run:   # <-- To be removed for production run
-            break                   # <-- To be removed for production run
+        # if count > 2 and dev_run:   # <-- To be removed for production run
+        #     break                   # <-- To be removed for production run
 
     return pg_master, pg_error
 
@@ -163,6 +182,8 @@ def main():
     browser = webdriver.Chrome(executable_path = path)
 
     browser.get('https://www.naukri.com/')
+
+    time.sleep(60)
 
     browser.find_element_by_xpath('/html/body/div[4]/div[3]/div[1]/div[1]/span[2]').click()
 
@@ -189,18 +210,37 @@ def main():
     while not finished:
 
         breaker += 1    
-        print ("breaker: ", breaker)  
-        if breaker > 2 and dev_run:   # <-- To be removed for production run
-            break                     # <-- To be removed for production run
+        print ("breaker: {0}, restart:{1}, stop:{2} ".format(breaker, restart_pg, stop_pg))  
+        if breaker >= restart_pg and breaker <= stop_pg:
 
-        link_list = get_job_links()
-        print ("link_list: ", link_list)
+            # if breaker > 2 and dev_run:   # <-- To be removed for production run
+            #     break                     # <-- To be removed for production run
 
-        pg_master, pg_error  =  click_links(link_list)
-        master.extend(pg_master)
-        error.extend(pg_error)
-            
+            link_list = get_job_links()
+            #print ("link_list: ", link_list)
+
+            pg_master, pg_error  =  click_links(link_list)
+
+            for item in pg_master:
+                print ("item[link]: ", item["link"])
+                #writeDB = huntCol.update_one({"job_id":item["job_id"]},{'$set':item},upsert=True)
+                huntCol.update_one({"job_id":item["job_id"]},{'$set':item},upsert=True)
+
+            if dev_run or prod_run:
+                with open(result_File, "a") as f: 
+                    for item in pg_master:
+                        f.write("%s\n" % item)  
+
+                with open(error_File, "a") as f: 
+                    for item in pg_error:
+                        f.write("%s\n" % item)     
+
+            # master.extend(pg_master)
+            # error.extend(pg_error)
+                
         time.sleep(2)
+
+        sys.stdout.flush()
 
         navigate = browser.find_elements_by_class_name("grayBtn")
         
@@ -217,6 +257,8 @@ def main():
     return master, error
     
 if __name__ == "__main__":
+
+    sys.stdout = Logger()
 
     connect_DB()
 
@@ -238,17 +280,17 @@ if __name__ == "__main__":
     #print ("master: ", master)
     #writeDB = huntCol.insert_many(master)
     
-    for item in master:
-        print ("item[link]: ", item["link"])
-        writeDB = huntCol.update_one({"job_id":item["job_id"]},{'$set':item},upsert=True)
+    # for item in master:
+    #     print ("item[link]: ", item["link"])
+    #     writeDB = huntCol.update_one({"job_id":item["job_id"]},{'$set':item},upsert=True)
 
-    if dev_run or prod_run:
-        with open(result_File, "w") as f: 
-            for item in master:
-                f.write("%s\n" % item)  
+    # if dev_run or prod_run:
+    #     with open(result_File, "w") as f: 
+    #         for item in master:
+    #             f.write("%s\n" % item)  
 
-        with open(error_File, "w") as f: 
-            for item in error:
-                f.write("%s\n" % item)     
+    #     with open(error_File, "w") as f: 
+    #         for item in error:
+    #             f.write("%s\n" % item)     
 
     print (" *** End *** ")
