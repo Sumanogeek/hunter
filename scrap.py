@@ -91,7 +91,6 @@ def scrape_link(page_source, link):
     with open('template.yml', 'r') as f:
         template = yaml.load(f, Loader=yaml.FullLoader)
 
-    
     rec = {}
     skillSum = []
     soup_level1=BeautifulSoup(page_source, 'html5lib')
@@ -221,10 +220,17 @@ def main():
 
             pg_master, pg_error  =  click_links(link_list)
 
+            inserts = 0
+            updates = 0
             for item in pg_master:
                 print ("item[link]: ", item["link"])
                 #writeDB = huntCol.update_one({"job_id":item["job_id"]},{'$set':item},upsert=True)
-                huntCol.update_one({"job_id":item["job_id"]},{'$set':item},upsert=True)
+                response = huntCol.update_one({"job_id":item["job_id"]},{'$set':item},upsert=True)
+                print ("Update: ", response._UpdateResult__raw_result["updatedExisting"])
+                if response._UpdateResult__raw_result["updatedExisting"] == False:
+                    inserts += 1
+                else:
+                    updates += 1
 
             if dev_run or prod_run:
                 with open(result_File, "a") as f: 
@@ -237,7 +243,14 @@ def main():
 
             # master.extend(pg_master)
             # error.extend(pg_error)
-                
+            print ("updates: {0}, inserts{1}".format(updates, inserts))
+            if inserts == 0:
+                print ("Breaking due to all duplicate links")
+                break
+            elif updates/inserts >= 9  :
+                print ("Breaking due to many duplicate links")
+                break
+
         time.sleep(2)
 
         sys.stdout.flush()
