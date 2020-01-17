@@ -18,8 +18,8 @@ import selenium.webdriver.support.ui as ui
 from selenium.common.exceptions import TimeoutException
 from pyvirtualdisplay import Display
 
-restart_pg = 0  # <--- set the restart page
-stop_pg = 25    # <--- set the stop page
+restart_pg = 3  # <--- set the restart page
+stop_pg = 10    # <--- set the stop page
 
 # dev_run = False; prod_run = True  # <--- uncomment for Prod Run
 dev_run = True ; prod_run = False   # <--- uncomment for Dev Run
@@ -105,10 +105,18 @@ def scrape_link(page_source, link):
         rec["type"] = "regular"
         index = 0
         soup_level2=soup_level1.find('div', attrs = {'class':'leftSec'}) 
-    elif (soup_level1.find('div', attrs = {'class':'flex_column'})):
+    elif (soup_level1.find('div', attrs = {'class':'av-content-full'})):
         rec["type"] = "av-special"
         index = 1
-        soup_level2=soup_level1.find('div', attrs = {'class':'flex_column'}) 
+        soup_level2=soup_level1.find('div', attrs = {'class':'av-content-full'}) 
+    elif (soup_level1.find('main', attrs = {'class':'av-content-full'})):
+        rec["type"] = "av-special-main"
+        index = 1
+        soup_level2=soup_level1.find('main', attrs = {'class':'av-content-full'})     
+    elif (soup_level1.find('main', attrs = {'class':'av-content-small'})):
+        rec["type"] = "av-special-main-small"
+        index = 1
+        soup_level2=soup_level1.find('main', attrs = {'class':'av-content-small'})     
     elif (soup_level1.find('div', attrs = {'id':'jdDiv'})):
         uniqueFlag = False
         rec["type"] = "id->jdDiv"
@@ -140,7 +148,7 @@ def scrape_link(page_source, link):
         for skill in skills:
             skillSum.append(skill.text)
         rec["key_skill"] = skillSum
-                
+         
     return rec
 
 def click_links(link_list):
@@ -283,15 +291,17 @@ if __name__ == "__main__":
     # path = r'/Users/sumanbalu/chromeDrive/chromedriver'
     # browser = webdriver.Chrome(executable_path = path)
     # link_list = [
-    #     'https://www.naukri.com/job-listings-Java-J2Ee-Developer-CTC-upto-18lpa-G9-Bengaluru-5-to-10-years-261219011779?src=cluster&sid=15780499725199&xp=2&px=1',
-    #     'https://www.naukri.com/job-listings-HSBC-Hiring-Senior-Business-Consultant-payments-Domain-HSBC-electronic-data-processing-india-pvt-ltd-Bengaluru-Hyderabad-9-to-14-years-030120007509?src=jobsearchDesk&sid=15780609552133&xp=21&px=4',
-    #     'https://www.naukri.com/job-listings-Senior-Front-end-Web-Developer-Liventus-Inc-Bengaluru-7-to-10-years-290319007660?src=cluster&sid=15780452651755&xp=1&px=1'
-    #     ]
+    #     ['regular', 'https://www.naukri.com/job-listings-Java-J2Ee-Developer-CTC-upto-18lpa-G9-Bengaluru-5-to-10-years-261219011779?src=cluster&sid=15780499725199&xp=2&px=1'],
+    #     ['id->jdDiv', 'https://www.naukri.com/job-listings-HSBC-Hiring-Senior-Business-Consultant-payments-Domain-HSBC-electronic-data-processing-india-pvt-ltd-Bengaluru-Hyderabad-9-to-14-years-030120007509?src=jobsearchDesk&sid=15780609552133&xp=21&px=4'],
+    #     ['av-special', 'https://www.naukri.com/job-listings-Opening-For-SAP-UI5-Hana-Developer-bangalore-Access-Automation-Private-Limited-Bengaluru-4-to-9-years-130120008561?src=jobsearchDesk&sid=15790653609191&xp=27&px=20'],
+    #     ['new', 'https://www.naukri.com/job-listings-Project-Lead-Java-J2EE-Sopra-Steria-India-Noida-Sector-135-Noida-9-to-12-years-050120001080?src=jobsearchDesk&sid=15790896802407&xp=24&px=28'],
+    #     ['av-special','https://www.naukri.com/job-listings-Senior-Front-end-Web-Developer-Liventus-Inc-Bengaluru-7-to-10-years-290319007660?src=cluster&sid=15780452651755&xp=1&px=1']
+    #    ]
     # master, error  =  click_links(link_list)
     # browser.quit()
 
-    #print ("master: ", master)
-    #writeDB = huntCol.insert_many(master)
+    # print ("master: ", master)
+    # writeDB = huntCol.insert_many(master)
     
     # for item in master:
     #     print ("item[link]: ", item["link"])
