@@ -17,9 +17,11 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import selenium.webdriver.support.ui as ui
 from selenium.common.exceptions import TimeoutException
 from pyvirtualdisplay import Display
+from random import randint
 
-restart_pg = 3  # <--- set the restart page
-stop_pg = 10    # <--- set the stop page
+# restart_pg =11  # <--- set the restart page
+# stop_pg = 20   # <--- set the stop page
+# dupsFound = False
 
 # dev_run = False; prod_run = True  # <--- uncomment for Prod Run
 dev_run = True ; prod_run = False   # <--- uncomment for Dev Run
@@ -169,7 +171,8 @@ def click_links(link_list):
             pg_error.append(link)
             print ("Write an error: ", link)
         browser.execute_script("window.history.go(-1)")
-        time.sleep(1)
+        
+        time.sleep(randint(1,3))
 
         # if count > 2 and dev_run:   # <-- To be removed for production run
         #     break                   # <-- To be removed for production run
@@ -179,7 +182,16 @@ def click_links(link_list):
 def main():
     print ("main")
 
-    global browser
+    global browser, restart_pg , stop_pg, dupsFound, breaker
+
+    with open(r'restart.yaml') as reInFile:
+        restart_resp = yaml.load(reInFile, Loader=yaml.FullLoader)
+        print ("restart_resp: ", restart_resp)
+
+    restart_pg = restart_resp["restart_pg"]  # <--- set the restart page
+    stop_pg = restart_resp["stop_pg"]   # <--- set the stop page
+    dupsFound = restart_resp["dupsFound"] 
+    breaker = 0
 
     path = r'/Users/sumanbalu/chromeDrive/chromedriver'
     if prod_run:
@@ -213,7 +225,6 @@ def main():
     error = []
     finished = False
 
-    breaker = 0
     while not finished:
 
         breaker += 1    
@@ -252,12 +263,13 @@ def main():
             # master.extend(pg_master)
             # error.extend(pg_error)
             print ("updates: {0}, inserts{1}".format(updates, inserts))
-            if inserts == 0:
-                print ("Breaking due to all duplicate links")
-                break
-            elif updates/inserts >= 9  :
-                print ("Breaking due to many duplicate links")
-                break
+            if dupsFound:
+                if inserts == 0:
+                    print ("Breaking due to all duplicate links")
+                    break
+                elif updates/inserts >= 9  :
+                    print ("Breaking due to many duplicate links")
+                    break
 
         time.sleep(2)
 
@@ -283,10 +295,39 @@ if __name__ == "__main__":
 
     connect_DB()
 
+    i = 0; retry = 5
+
     # sys.stdout = open(sysout_File, 'w')
 
     print (" *** Start *** ", )
-    master, error = main()
+
+    while i < retry:
+        print ("try: ", i)
+
+        try:
+            master, error = main()
+            res_file = {}
+            res_file["stop_pg"] = stop_pg
+            res_file["dupsFound"] = dupsFound
+            res_file["restart_pg"] =  3
+            with open(r'restart.yaml', 'w') as reOutFile:
+                res_doc_resp = yaml.dump(res_file, reOutFile)
+            i = retry
+        except:
+            i += 1
+            res_file = {}
+            res_file["stop_pg"] = stop_pg
+            res_file["dupsFound"] = dupsFound
+            if breaker > restart_pg:
+                res_file["restart_pg"] =  breaker
+            else:
+                res_file["restart_pg"] =  restart_pg
+            with open(r'restart.yaml', 'w') as reOutFile:
+                res_doc_resp = yaml.dump(res_file, reOutFile)
+        finally:
+            print ("res_doc_resp: ", res_doc_resp)
+
+    
 
     # path = r'/Users/sumanbalu/chromeDrive/chromedriver'
     # browser = webdriver.Chrome(executable_path = path)
