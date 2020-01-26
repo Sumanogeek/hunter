@@ -18,6 +18,10 @@ import selenium.webdriver.support.ui as ui
 from selenium.common.exceptions import TimeoutException
 from pyvirtualdisplay import Display
 from random import randint
+import logging
+import traceback
+
+logger = logging.Logger('catch_all')
 
 # restart_pg =11  # <--- set the restart page
 # stop_pg = 20   # <--- set the stop page
@@ -202,7 +206,7 @@ def main():
 
     browser.get('https://www.naukri.com/')
 
-    time.sleep(60)
+    time.sleep(6)
 
     browser.find_element_by_xpath('/html/body/div[4]/div[3]/div[1]/div[1]/span[2]').click()
 
@@ -279,11 +283,22 @@ def main():
         
         if len(navigate) == 1:
             if navigate[0].get_attribute("innerText") == "Next":
+                if breaker < restart_pg:
+                    pagination = browser.find_element_by_css_selector("body > div.mainSec > div > div.container.fl > div.srp_container.fl > div.pagination > a")
+                    source_href = pagination.get_attribute("althref")
+                    target_href = re.sub(r"\d+$", str(restart_pg),  source_href)
+                    browser.execute_script("arguments[0].setAttribute('althref', arguments[1])", pagination, target_href)
+                    after_href = pagination.get_attribute("althref")
+                    print ("source_href: {0} \ntarget_href: {1} \nafter_href: {2}".format(source_href, target_href, after_href))
+                    breaker = restart_pg - 1
+
                 browser.execute_script("document.querySelector('button.grayBtn').click()")
             else:
                 finished = True
         else:
             browser.execute_script("document.querySelectorAll('button.grayBtn')[1].click()")
+
+        time.sleep(2)
 
     browser.quit()
 
@@ -314,6 +329,7 @@ if __name__ == "__main__":
                 res_doc_resp = yaml.dump(res_file, reOutFile)
             i = retry
         except:
+            print(traceback.format_exc())
             i += 1
             res_file = {}
             res_file["stop_pg"] = stop_pg
@@ -326,35 +342,5 @@ if __name__ == "__main__":
                 res_doc_resp = yaml.dump(res_file, reOutFile)
         finally:
             print ("res_doc_resp: ", res_doc_resp)
-
-    
-
-    # path = r'/Users/sumanbalu/chromeDrive/chromedriver'
-    # browser = webdriver.Chrome(executable_path = path)
-    # link_list = [
-    #     ['regular', 'https://www.naukri.com/job-listings-Java-J2Ee-Developer-CTC-upto-18lpa-G9-Bengaluru-5-to-10-years-261219011779?src=cluster&sid=15780499725199&xp=2&px=1'],
-    #     ['id->jdDiv', 'https://www.naukri.com/job-listings-HSBC-Hiring-Senior-Business-Consultant-payments-Domain-HSBC-electronic-data-processing-india-pvt-ltd-Bengaluru-Hyderabad-9-to-14-years-030120007509?src=jobsearchDesk&sid=15780609552133&xp=21&px=4'],
-    #     ['av-special', 'https://www.naukri.com/job-listings-Opening-For-SAP-UI5-Hana-Developer-bangalore-Access-Automation-Private-Limited-Bengaluru-4-to-9-years-130120008561?src=jobsearchDesk&sid=15790653609191&xp=27&px=20'],
-    #     ['new', 'https://www.naukri.com/job-listings-Project-Lead-Java-J2EE-Sopra-Steria-India-Noida-Sector-135-Noida-9-to-12-years-050120001080?src=jobsearchDesk&sid=15790896802407&xp=24&px=28'],
-    #     ['av-special','https://www.naukri.com/job-listings-Senior-Front-end-Web-Developer-Liventus-Inc-Bengaluru-7-to-10-years-290319007660?src=cluster&sid=15780452651755&xp=1&px=1']
-    #    ]
-    # master, error  =  click_links(link_list)
-    # browser.quit()
-
-    # print ("master: ", master)
-    # writeDB = huntCol.insert_many(master)
-    
-    # for item in master:
-    #     print ("item[link]: ", item["link"])
-    #     writeDB = huntCol.update_one({"job_id":item["job_id"]},{'$set':item},upsert=True)
-
-    # if dev_run or prod_run:
-    #     with open(result_File, "w") as f: 
-    #         for item in master:
-    #             f.write("%s\n" % item)  
-
-    #     with open(error_File, "w") as f: 
-    #         for item in error:
-    #             f.write("%s\n" % item)     
 
     print (" *** End *** ")
