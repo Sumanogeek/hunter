@@ -122,7 +122,11 @@ def scrape_link(page_source, link):
     elif (soup_level1.find('main', attrs = {'class':'av-content-small'})):
         rec["type"] = "av-special-main-small"
         index = 1
-        soup_level2=soup_level1.find('main', attrs = {'class':'av-content-small'})     
+        soup_level2=soup_level1.find('main', attrs = {'class':'av-content-small'})
+    elif (soup_level1.find('div', attrs = {'class':'av-content-small'})):
+        rec["type"] = "av-special-div-small"
+        index = 1
+        soup_level2=soup_level1.find('div', attrs = {'class':'av-content-small'})      
     elif (soup_level1.find('div', attrs = {'id':'jdDiv'})):
         uniqueFlag = False
         rec["type"] = "id->jdDiv"
@@ -300,7 +304,7 @@ def main():
 
         time.sleep(2)
 
-    browser.quit()
+    # browser.quit()
 
     return master, error
     
@@ -342,5 +346,6 @@ if __name__ == "__main__":
                 res_doc_resp = yaml.dump(res_file, reOutFile)
         finally:
             print ("res_doc_resp: ", res_doc_resp)
+            browser.quit()
 
     print (" *** End *** ")
