@@ -201,9 +201,9 @@ def main():
     dupsFound = restart_resp["dupsFound"] 
     breaker = 0
 
-    try:
-        path = r'/Users/sumanbalu/chromeDrive/chromedriver'
-    except:
+    
+    path = r'/Users/sumanbalu/chromeDrive/chromedriver'
+    if not os.path.exists(path):
         path = r'/usr/bin/chromedriver'
     
     if prod_run:
