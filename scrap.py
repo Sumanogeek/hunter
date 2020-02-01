@@ -201,7 +201,11 @@ def main():
     dupsFound = restart_resp["dupsFound"] 
     breaker = 0
 
-    path = r'/Users/sumanbalu/chromeDrive/chromedriver'
+    try:
+        path = r'/Users/sumanbalu/chromeDrive/chromedriver'
+    except:
+        path = r'/usr/bin/chromedriver'
+    
     if prod_run:
         path = r'/usr/bin/chromedriver'                # <--- uncomment for production
         display = Display(visible=0, size=(800, 800))  # <--- uncomment for production
