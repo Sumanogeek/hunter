@@ -27,8 +27,8 @@ logger = logging.Logger('catch_all')
 # stop_pg = 20   # <--- set the stop page
 # dupsFound = False
 
-dev_run = False; prod_run = True  # <--- uncomment for Prod Run
-# dev_run = True ; prod_run = False   # <--- uncomment for Dev Run
+# dev_run = False; prod_run = True  # <--- uncomment for Prod Run
+dev_run = True ; prod_run = False   # <--- uncomment for Dev Run
 
 time_stamp = datetime.now()
 sysout_File = "output/logs" + str(time_stamp) + ".txt"
